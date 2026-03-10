@@ -8,6 +8,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../core/db/db_service.dart';
 import '../../core/firebase/auth_service.dart';
 import '../../app/controllers/settings_controller.dart';
+import '../../core/ads/ad_service.dart';
 import '../gamification/achievement_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -40,6 +41,9 @@ class _SplashScreenState extends State<SplashScreen> {
       // Register global settings and gamification services
       Get.put(SettingsController(), permanent: true);
       Get.put(AchievementService(DbService.instance.database), permanent: true);
+      
+      // Initialize and register AdService
+      await Get.put(AdService(), permanent: true).init();
     } catch (e) {
       debugPrint('Initialization error: $e');
     }

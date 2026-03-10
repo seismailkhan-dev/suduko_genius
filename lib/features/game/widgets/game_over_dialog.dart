@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/ads/ad_service.dart';
 import '../controller/game_controller.dart';
 
 /// Shown reactively when [GameController.isGameOver] becomes true.
@@ -84,10 +85,14 @@ class GameOverDialog extends StatelessWidget {
                         primary: true,
                         accentColor: const Color(0xFFFFC107),
                         onTap: () {
-                          Get.back();
-                          // TODO: trigger ad SDK, then call ctrl.onRewardedLifeEarned()
-                          // For now we call directly so the UI is wired up:
-                          ctrl.onRewardedLifeEarned();
+                          AdService.to.showRewardedForLife(
+                            onRewarded: ctrl.onRewardedLifeEarned,
+                            onClosed: () {
+                              if (!ctrl.hasUsedAdLife.value) {
+                                Get.back(); // Dismiss dialog if they closed the ad without a reward
+                              }
+                            },
+                          );
                         },
                       ),
                       const SizedBox(height: 10),

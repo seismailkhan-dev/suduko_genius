@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../app/controllers/settings_controller.dart';
+import '../../core/ads/ad_ids.dart';
 
 class AdBannerWidget extends StatefulWidget {
   const AdBannerWidget({super.key});
@@ -26,13 +27,8 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
     // Check global DI state to see if user purchased "remove ads"
     if (Get.find<SettingsController>().isAdsRemoved.value) return;
 
-    // Use test ad unit ID based on platform
-    final adUnitId = GetPlatform.isAndroid 
-        ? 'ca-app-pub-3940256099942544/6300978111' 
-        : 'ca-app-pub-3940256099942544/2934735716';
-
     _bannerAd = BannerAd(
-      adUnitId: adUnitId,
+      adUnitId: AdIds.bannerAdUnitId,
       request: const AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(

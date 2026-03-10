@@ -17,6 +17,8 @@ import '../../events/event_controller.dart';
 import '../../../core/firebase/firestore_service.dart';
 import '../../gamification/xp_service.dart';
 import '../../gamification/achievement_service.dart';
+import '../../../core/ads/ad_service.dart';
+import '../../home/home_controller.dart';
 
  // Removed hardcoded XP constants 
 
@@ -243,12 +245,12 @@ class GameController extends GetxController with WidgetsBindingObserver {
       _hintsUsed++;
       placeNumber(solution[row][col]);
     } else {
-      // Show rewarded-ad dialog (caller is responsible for triggering ad SDK).
-      Get.dialog(
-        _RewardHintDialog(
-          onRewardEarned: onRewardedHintEarned,
-        ),
-        barrierDismissible: false,
+      // Request ad from AdService
+      AdService.to.showRewardedForHint(
+        onRewarded: onRewardedHintEarned,
+        onClosed: () {
+          // Additional logic if needed on modal close
+        },
       );
     }
   }
@@ -487,6 +489,10 @@ class GameController extends GetxController with WidgetsBindingObserver {
       Get.find<EventController>().onPuzzleComplete();
     }
 
+    if (Get.isRegistered<HomeController>()) {
+      Get.find<HomeController>().refreshState();
+    }
+
     // Push to Firestore Leaderboard
     try {
       if (Get.isRegistered<FirestoreService>()) {
@@ -509,18 +515,5 @@ class GameController extends GetxController with WidgetsBindingObserver {
   static List<List<int>> _decode2D(String json) {
     final outer = jsonDecode(json) as List;
     return outer.map((row) => List<int>.from(row as List)).toList();
-  }
-}
-
-// ── Simple in-game dialog widget (no explicit import of material needed here) ─
-
-class _RewardHintDialog extends StatelessWidget {
-  const _RewardHintDialog({required this.onRewardEarned});
-  final VoidCallback onRewardEarned;
-
-  @override
-  Widget build(BuildContext context) {
-    // Full implementation lives in the UI layer; this is a placeholder hook.
-    return const SizedBox.shrink();
   }
 }

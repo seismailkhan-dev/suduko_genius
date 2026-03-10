@@ -9,6 +9,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../app/theme/app_theme.dart';
 import '../../core/puzzle/models.dart';
 import '../gamification/achievement_definitions.dart';
+import '../../core/ads/ad_service.dart';
 
 class WinScreen extends StatefulWidget {
   const WinScreen({super.key});
@@ -46,8 +47,6 @@ class _WinScreenState extends State<WinScreen> {
     }
     Share.share(text);
   }
-
-  @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<GameColors>()!;
     final textTheme = Theme.of(context).textTheme;
@@ -235,7 +234,11 @@ class _WinScreenState extends State<WinScreen> {
                       children: [
                         Expanded(
                           child: OutlinedButton.icon(
-                            onPressed: () => Get.offAllNamed('/home'),
+                            onPressed: () {
+                              AdService.to.showInterstitialIfAppropriate(
+                                onComplete: () => Get.offAllNamed('/home'),
+                              );
+                            },
                             icon: const Icon(Icons.home),
                             label: const Text('Home'),
                             style: OutlinedButton.styleFrom(
