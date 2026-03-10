@@ -84,7 +84,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
             // Animated text
             Text(
-              'Sudoku Pro',
+              'Sudoku Genius',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.2,
