@@ -57,8 +57,8 @@ class _WinScreenState extends State<WinScreen> {
         children: [
           // Background Confetti
           Positioned.fill(
-            child: Lottie.network(
-              'https://lottie.host/825d19db-edba-4ad9-a29d-4c3bbde27ac8/8WkUfP2Q0P.json',
+            child: Lottie.asset(
+              'assets/lottie/confetti.json',
               repeat: false,
               fit: BoxFit.cover,
             ),
