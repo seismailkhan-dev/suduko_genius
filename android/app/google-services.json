@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "588392643285",
+    "project_id": "sudokumaster-f3188",
+    "storage_bucket": "sudokumaster-f3188.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:588392643285:android:4d45b7424cf7d8574b805c",
+        "android_client_info": {
+          "package_name": "com.ikappsstudio.sudoku"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGwoa_jGR9_HwSaxGmumZ503m-qDigrqc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
