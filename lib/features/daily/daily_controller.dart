@@ -118,9 +118,8 @@ class DailyController extends GetxController {
     }
 
     if (todayPuzzle.value != null) {
-      // NOTE: We rely on the GameController reading this configuration.
-      // We will route to /game and handle the daily logic there or pass args.
       Get.toNamed('/game', arguments: {
+        'action': 'daily_puzzle',
         'puzzle': todayPuzzle.value,
         'isDaily': true,
       });

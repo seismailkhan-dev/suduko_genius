@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 import '../../core/puzzle/models.dart';
-import '../game/controller/game_controller.dart';
 
 class DifficultyScreen extends StatelessWidget {
   const DifficultyScreen({super.key});
@@ -48,11 +47,10 @@ class DifficultyScreen extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 16),
             child: GestureDetector(
               onTap: () {
-                if (!Get.isRegistered<GameController>()) {
-                  Get.lazyPut(() => GameController());
-                }
-                Get.find<GameController>().startGame(l.diff);
-                Get.offNamed('/game');
+                Get.offNamed('/game', arguments: {
+                  'action': 'new',
+                  'difficulty': l.diff,
+                });
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),

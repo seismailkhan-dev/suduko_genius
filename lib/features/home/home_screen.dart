@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 import '../../app/controllers/theme_controller.dart';
-import '../game/controller/game_controller.dart';
 import 'home_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -175,12 +174,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.only(bottom: 16),
                       child: GestureDetector(
                         onTap: () {
-                          // Pass saved game state to controller, then route
-                          if (!Get.isRegistered<GameController>()) {
-                            Get.lazyPut(() => GameController());
-                          }
-                          Get.find<GameController>().resumeSavedGame(game);
-                          Get.toNamed('/game');
+                          Get.toNamed('/game', arguments: {
+                            'action': 'resume',
+                            'savedGame': game,
+                          });
                         },
                         child: Container(
                           padding: const EdgeInsets.all(20),
@@ -278,11 +275,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   GestureDetector(
                     onTap: () {
                       final today = DateTime.now().toIso8601String().split('T')[0];
-                      if (!Get.isRegistered<GameController>()) {
-                            Get.lazyPut(() => GameController());
-                      }
-                      Get.find<GameController>().startDailyGame(today);
-                      Get.toNamed('/game');
+                      Get.toNamed('/game', arguments: {
+                        'action': 'daily',
+                        'date': today,
+                        'isDaily': true,
+                      });
                     },
                     child: Container(
                       padding: const EdgeInsets.all(24),

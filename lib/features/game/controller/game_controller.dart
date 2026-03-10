@@ -78,6 +78,17 @@ class GameController extends GetxController with WidgetsBindingObserver {
     final Map<String, dynamic>? args = Get.arguments;
     if (args != null) {
       isDaily = args['isDaily'] ?? false;
+      
+      final action = args['action'];
+      if (action == 'new') {
+        startGame(args['difficulty']);
+      } else if (action == 'resume') {
+        resumeSavedGame(args['savedGame']);
+      } else if (action == 'daily') {
+        startDailyGame(args['date']);
+      } else if (action == 'daily_puzzle') {
+        _applyPuzzle(args['puzzle']);
+      }
     }
   }
 
