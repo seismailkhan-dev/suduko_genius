@@ -88,8 +88,8 @@ class GameOverDialog extends StatelessWidget {
                           AdService.to.showRewardedForLife(
                             onRewarded: ctrl.onRewardedLifeEarned,
                             onClosed: () {
-                              if (!ctrl.hasUsedAdLife.value) {
-                                Get.back(); // Dismiss dialog if they closed the ad without a reward
+                              if (ctrl.hasUsedAdLife.value) {
+                                Get.back(); // Dismiss dialog to resume gameplay
                               }
                             },
                           );
