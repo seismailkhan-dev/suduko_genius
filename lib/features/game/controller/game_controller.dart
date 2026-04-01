@@ -15,9 +15,10 @@ import '../../../core/puzzle/sudoku_validator.dart';
 import '../../daily/daily_controller.dart';
 import '../../events/event_controller.dart';
 import '../../../core/firebase/firestore_service.dart';
-import '../../gamification/xp_service.dart';
-import '../../gamification/achievement_service.dart';
 import '../../../core/ads/ad_service.dart';
+import '../../../core/analytics/analytics_service.dart';
+import '../../gamification/achievement_service.dart';
+import '../../gamification/xp_service.dart';
 import '../../home/home_controller.dart';
 
  // Removed hardcoded XP constants 
@@ -115,12 +116,14 @@ class GameController extends GetxController with WidgetsBindingObserver {
   void startGame(Difficulty d) {
     _currentPuzzle = SudokuGenerator.generate(d);
     _applyPuzzle(_currentPuzzle);
+    AnalyticsService.to.logGameStart(d.name);
   }
 
   /// Starts a daily-challenge puzzle for [dateStr] (e.g. '2024-03-10').
   void startDailyGame(String dateStr) {
     _currentPuzzle = SudokuGenerator.generateForDate(dateStr);
     _applyPuzzle(_currentPuzzle);
+    AnalyticsService.to.logGameStart('daily_challenge');
   }
 
   /// Restores a previously saved game from a Drift [SavedGame] record.
@@ -223,9 +226,16 @@ class GameController extends GetxController with WidgetsBindingObserver {
       // Wrong placement.
       errorCells.add('$row,$col');
       mistakesCount.value++;
+      AnalyticsService.to.logMistake();
       if (mistakesCount.value >= 3) {
         isGameOver.value = true;
         _timer?.cancel();
+        AnalyticsService.to.logGameEnd(
+          difficulty.value.name,
+          false,
+          mistakesCount.value,
+          elapsedSeconds.value,
+        );
       }
     }
     autoSave();
@@ -243,6 +253,7 @@ class GameController extends GetxController with WidgetsBindingObserver {
     if (hintsRemaining.value > 0) {
       hintsRemaining.value--;
       _hintsUsed++;
+      AnalyticsService.to.logHintUsed();
       placeNumber(solution[row][col]);
     } else {
       // Request ad from AdService
@@ -423,6 +434,13 @@ class GameController extends GetxController with WidgetsBindingObserver {
   Future<void> _onGameComplete() async {
     _timer?.cancel();
     isComplete.value = true;
+
+    AnalyticsService.to.logGameEnd(
+      difficulty.value.name,
+      true,
+      mistakesCount.value,
+      elapsedSeconds.value,
+    );
 
     final result = GameResult(
       puzzle: _currentPuzzle,

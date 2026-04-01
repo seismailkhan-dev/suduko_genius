@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../app/controllers/settings_controller.dart';
+import '../analytics/analytics_service.dart';
 import 'ad_ids.dart';
 
 class AdService extends GetxService {
@@ -50,6 +51,14 @@ class AdService extends GetxService {
         onAdLoaded: (ad) {
           debugPrint('InterstitialAd loaded.');
           _interstitialAd = ad;
+          _interstitialAd!.onPaidEvent = (ad, valueMicros, precision, currencyCode) {
+            AnalyticsService.to.logAdRevenue(
+              adUnitId: ad.adUnitId,
+              format: 'interstitial',
+              valueMicros: valueMicros,
+              currencyCode: currencyCode,
+            );
+          };
           _isInterstitialLoading = false;
         },
         onAdFailedToLoad: (error) {
@@ -113,6 +122,14 @@ class AdService extends GetxService {
         onAdLoaded: (ad) {
           debugPrint('RewardedAd loaded.');
           _rewardedAd = ad;
+          _rewardedAd!.onPaidEvent = (ad, valueMicros, precision, currencyCode) {
+            AnalyticsService.to.logAdRevenue(
+              adUnitId: ad.adUnitId,
+              format: 'rewarded',
+              valueMicros: valueMicros,
+              currencyCode: currencyCode,
+            );
+          };
           _isRewardedLoading = false;
         },
         onAdFailedToLoad: (error) {

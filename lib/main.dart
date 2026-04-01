@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'app/app.dart';
+import 'core/analytics/analytics_service.dart';
 import 'core/firebase/auth_service.dart';
 import 'core/firebase/firestore_service.dart';
 import 'firebase_options.dart';
@@ -18,6 +19,7 @@ void main() async {
   // Register services immediately 
   Get.put(AuthService());
   Get.put(FirestoreService());
+  Get.put(AnalyticsService());
 
   runApp(const App());
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../app/controllers/settings_controller.dart';
+import '../../core/analytics/analytics_service.dart';
 import '../../core/ads/ad_ids.dart';
 
 class AdBannerWidget extends StatefulWidget {
@@ -41,6 +42,14 @@ class _AdBannerWidgetState extends State<AdBannerWidget> {
         onAdFailedToLoad: (ad, err) {
           debugPrint('BannerAd failed to load: $err');
           ad.dispose();
+        },
+        onPaidEvent: (ad, valueMicros, precision, currencyCode) {
+          AnalyticsService.to.logAdRevenue(
+            adUnitId: ad.adUnitId,
+            format: 'banner',
+            valueMicros: valueMicros,
+            currencyCode: currencyCode,
+          );
         },
       ),
     )..load();
