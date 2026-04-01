@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../shared/widgets/ad_banner_widget.dart';
 import 'controller/game_controller.dart';
 import 'widgets/game_over_dialog.dart';
 import 'widgets/number_pad.dart';
@@ -31,40 +32,50 @@ class GameScreen extends StatelessWidget {
 
     final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ── App bar ─────────────────────────────────────────────────────
-            _GameAppBar(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) return;
+        await ctrl.autoSave();
+        Get.offAllNamed('/home');
+      },
+      child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // ── App bar ─────────────────────────────────────────────────────
+              _GameAppBar(),
 
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-            // ── Progress / timer row ────────────────────────────────────────
-            _StatsRow(),
+              // ── Progress / timer row ────────────────────────────────────────
+              _StatsRow(),
 
-            const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-            // ── Board ────────────────────────────────────────────────────────
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: SudokuBoardWidget(),
-            ),
+              // ── Board ────────────────────────────────────────────────────────
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: SudokuBoardWidget(),
+              ),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            // ── Number pad ──────────────────────────────────────────────────
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: NumberPadWidget(),
-            ),
+              // ── Number pad ──────────────────────────────────────────────────
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: NumberPadWidget(),
+              ),
 
-            const Spacer(),
-          ],
+              const Spacer(),
+
+              // ── Ad Banner ───────────────────────────────────────────────────
+              const AdBannerWidget(),
+            ],
+          ),
         ),
       ),
-
     );
   }
 }

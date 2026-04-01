@@ -327,6 +327,7 @@ class GameController extends GetxController with WidgetsBindingObserver {
       );
 
       if (_savedGameId == null) {
+        await db.savedGames.deleteAllGames();
         _savedGameId = await db.savedGames.insertGame(companion);
       } else {
         await db.savedGames.updateGame(
@@ -464,6 +465,7 @@ class GameController extends GetxController with WidgetsBindingObserver {
 
       await db.userStats.addXP(xp);
       await db.userStats.incrementPuzzleCount(difficulty.value.name);
+      await db.userStats.incrementMistakesAndHints(result.mistakes, result.hintsUsed);
       
       final updatedStats = await db.userStats.getStats();
       newLevel = updatedStats?.level ?? 1;

@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 import '../../app/controllers/theme_controller.dart';
+import '../../shared/widgets/ad_banner_widget.dart';
 import 'home_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -319,6 +320,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+
+            // ── Ad Banner ───────────────────────────────────────────────────
+            const AdBannerWidget(),
           ],
         ),
       ),

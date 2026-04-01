@@ -3,6 +3,7 @@
 import 'package:get/get.dart';
 import '../../core/db/app_database.dart';
 import '../../core/db/db_service.dart';
+import '../../features/gamification/level_service.dart';
 
 class HomeController extends GetxController {
   final hasActiveGame = false.obs;
@@ -39,8 +40,8 @@ class HomeController extends GetxController {
     final stats = await db.userStats.getStats();
     if (stats != null) {
       streakDays.value = stats.streakDays;
-      level.value = stats.level;
       totalXP.value = stats.totalXP;
+      level.value = LevelService.getLevel(stats.totalXP);
     }
 
     // 3. Stub remote config event check (simulates real network call)
@@ -48,8 +49,8 @@ class HomeController extends GetxController {
     activeEvent.value = null; // e.g. "Spring Tournament"
   }
 
-  int get xpForNextLevel => level.value * 1000;
-  double get levelProgress => totalXP.value % 1000 / 1000.0;
+  int get xpForNextLevel => LevelService.getXPForNextLevel(level.value);
+  double get levelProgress => LevelService.getProgressToNextLevel(totalXP.value);
 
   void refreshState() {
     _loadState();

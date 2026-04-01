@@ -9,6 +9,7 @@ import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 
 import '../../features/gamification/achievement_definitions.dart';
+import '../../features/gamification/level_service.dart';
 
 part 'app_database.g.dart';
 
@@ -179,14 +180,14 @@ class UserStatsDao extends DatabaseAccessor<AppDatabase>
   Future<bool> updateStats(UserStatsCompanion entry) =>
       update(userStats).replace(entry);
 
-  /// Atomically increments XP and recalculates level (every 1000 XP).
+  /// Atomically increments XP and recalculates level using LevelService.
   Future<void> addXP(int xp) async {
     await transaction(() async {
       final current = await getStats();
       if (current == null) {
         await insertStats(UserStatsCompanion(
           totalXP: Value(xp),
-          level: Value(1 + xp ~/ 1000),
+          level: Value(LevelService.getLevel(xp)),
         ));
         return;
       }
@@ -195,8 +196,26 @@ class UserStatsDao extends DatabaseAccessor<AppDatabase>
           .toCompanion(true)
           .copyWith(
             totalXP: Value(newXP),
-            level: Value(1 + newXP ~/ 1000),
+            level: Value(LevelService.getLevel(newXP)),
           ));
+    });
+  }
+
+  /// Increments the total mistakes and hints
+  Future<void> incrementMistakesAndHints(int mistakes, int hints) async {
+    await transaction(() async {
+      final current = await getStats();
+      if (current == null) {
+        await insertStats(UserStatsCompanion(
+          totalMistakes: Value(mistakes),
+          totalHints: Value(hints),
+        ));
+      } else {
+        await updateStats(current.toCompanion(true).copyWith(
+          totalMistakes: Value(current.totalMistakes + mistakes),
+          totalHints: Value(current.totalHints + hints),
+        ));
+      }
     });
   }
 

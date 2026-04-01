@@ -149,6 +149,39 @@ class DailyController extends GetxController {
       }
     } catch (_) {}
 
+    // Update Streak
+    final stats = await db.userStats.getStats();
+    final lastPlayed = stats?.lastPlayedDate ?? '';
+    int newStreak = stats?.streakDays ?? 0;
+
+    if (lastPlayed != todayStr) {
+      if (lastPlayed.isNotEmpty) {
+        final lastTime = DateTime.parse(lastPlayed);
+        final todayTime = DateTime.parse(todayStr);
+        final diffDays = todayTime.difference(lastTime).inDays;
+        
+        if (diffDays == 1) {
+          newStreak++;
+        } else if (diffDays > 1 || diffDays < 0) {
+          newStreak = 1;
+        }
+      } else {
+        newStreak = 1;
+      }
+
+      if (stats == null) {
+        await db.userStats.insertStats(UserStatsCompanion(
+          streakDays: drift.Value(newStreak),
+          lastPlayedDate: drift.Value(todayStr),
+        ));
+      } else {
+        await db.userStats.updateStats(stats.toCompanion(true).copyWith(
+          streakDays: drift.Value(newStreak),
+          lastPlayedDate: drift.Value(todayStr),
+        ));
+      }
+    }
+
     // Refresh state
     await _initDailyData();
   }
