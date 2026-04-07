@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../core/puzzle/models.dart';
 import '../../shared/widgets/ad_banner_widget.dart';
 import 'controller/game_controller.dart';
 import 'widgets/game_over_dialog.dart';
@@ -16,6 +17,21 @@ class GameScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ctrl = Get.find<GameController>();
+
+    // Process difficulty from push notification route arguments
+    final arg = ModalRoute.of(context)?.settings.arguments;
+    if (arg != null && arg is String) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Only initialize if the game hasn't started yet
+        if (ctrl.elapsedSeconds.value == 0 && !ctrl.isGameOver.value && !ctrl.isComplete.value) {
+          final diffEnum = Difficulty.values.firstWhere(
+            (e) => e.name == arg.toLowerCase(),
+            orElse: () => Difficulty.easy,
+          );
+          ctrl.startGame(diffEnum);
+        }
+      });
+    }
 
     // Show game-over dialog reactively whenever isGameOver flips to true.
     ever(ctrl.isGameOver, (bool over) {

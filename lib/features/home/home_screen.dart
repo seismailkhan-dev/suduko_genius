@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 
 import '../../app/controllers/theme_controller.dart';
 import '../../shared/widgets/ad_banner_widget.dart';
+import '../../shared/widgets/update_dialog.dart';
+import '../../services/update_service.dart';
 import 'home_controller.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,6 +24,31 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _ctrl = Get.put(HomeController());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkUpdate();
+    });
+  }
+
+  Future<void> _checkUpdate() async {
+    final updateData = await UpdateService.checkForUpdate();
+    if (updateData == null) return;
+
+    if (!mounted) return;
+
+    final forceUpdate = updateData['force_update'] as bool? ?? false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: !forceUpdate,
+      builder: (context) {
+        return UpdateDialog(
+          title: updateData['update_title'] as String,
+          features: updateData['update_features'] as String,
+          forceUpdate: forceUpdate,
+          onLater: () {},
+        );
+      },
+    );
   }
 
   @override

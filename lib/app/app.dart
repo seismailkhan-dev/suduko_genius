@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../features/game/game_screen.dart';
 import '../features/home/difficulty_screen.dart';
 import '../features/home/home_screen.dart';
@@ -16,6 +15,7 @@ import 'bindings/game_binding.dart';
 import 'controllers/theme_controller.dart';
 import 'theme/app_theme.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 class App extends StatelessWidget {
   const App({super.key});
 
@@ -25,6 +25,7 @@ class App extends StatelessWidget {
     final themeController = Get.put(ThemeController());
 
     return Obx(() => GetMaterialApp(
+          navigatorKey: navigatorKey,
           title: 'Sudoku Genius',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
