@@ -117,18 +117,21 @@ class _SudokuCellState extends State<SudokuCell>
                   : null,
             ),
             child: Center(
-              child: value != 0 && notes == null || (notes?.isEmpty ?? true)
-                  ? _buildDigit(value, isGiven, textColor)
-                  : value != 0
-                      ? _buildDigit(value, isGiven, textColor)
-                      : notes != null && notes.isNotEmpty
-                          ? _buildNotes(notes, context)
-                          : const SizedBox.shrink(),
+              child: _buildCellContent(value, isGiven, textColor, notes, context),
             ),
           ),
         ),
       );
     });
+  }
+
+  Widget _buildCellContent(int value, bool isGiven, Color textColor, Set<int>? notes, BuildContext context) {
+    if (value != 0) {
+      return _buildDigit(value, isGiven, textColor);
+    } else if (notes != null && notes.isNotEmpty) {
+      return _buildNotes(notes, context);
+    }
+    return const SizedBox.shrink();
   }
 
   Widget _buildDigit(int value, bool isGiven, Color textColor) {
@@ -139,7 +142,6 @@ class _SudokuCellState extends State<SudokuCell>
         fontSize: 20,
         fontWeight: isGiven ? FontWeight.w800 : FontWeight.w500,
         color: textColor,
-        height: 1,
       ),
     );
   }
@@ -178,13 +180,13 @@ class _SudokuCellState extends State<SudokuCell>
     if (isError) return theme.colorScheme.error.withValues(alpha: 0.18);
     if (isSameNumber) return colors?.cellHighlight.withValues(alpha: 0.2) ?? theme.colorScheme.primary.withValues(alpha: 0.14);
     if (isHighlighted) return colors?.cellHighlight ?? theme.colorScheme.primary.withValues(alpha: 0.07);
-    if (isGiven) return colors?.boardBackground ?? theme.cardTheme.color ?? theme.scaffoldBackgroundColor;
-    return colors?.boardBackground ?? theme.scaffoldBackgroundColor;
+    if (isGiven) return colors?.boardBackground ?? theme.cardTheme.color ?? theme.colorScheme.surface;
+    return colors?.boardBackground ?? theme.colorScheme.surface;
   }
 
   Color _resolveTextColor(bool isGiven, bool isError, GameColors? colors, ThemeData theme) {
     if (isError) return colors?.errorNumberColor ?? theme.colorScheme.error;
-    if (isGiven) return colors?.givenNumberColor ?? theme.textTheme.bodyMedium?.color ?? Colors.black;
+    if (isGiven) return colors?.givenNumberColor ?? theme.textTheme.bodyMedium?.color ?? theme.colorScheme.onSurface;
     return colors?.inputNumberColor ?? theme.colorScheme.primary;
   }
 }

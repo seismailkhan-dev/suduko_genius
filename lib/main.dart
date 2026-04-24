@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'app/app.dart';
+import 'app/controllers/settings_controller.dart';
+import 'app/controllers/theme_controller.dart';
 import 'core/analytics/analytics_service.dart';
 import 'core/firebase/auth_service.dart';
 import 'core/firebase/firestore_service.dart';
@@ -19,6 +21,9 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  Get.put(SettingsController(), permanent: true);
+  Get.put(ThemeController(), permanent: true);
+  
   // Initialize Firebase FIRST
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -31,7 +36,22 @@ void main() async {
   Get.put(FirestoreService());
   Get.put(AnalyticsService());
 
-  await NotificationService().init();
+  // Start notification init (non-blocking for the full init),
+  // but we MUST wait for the initial message check so the splash screen
+  // can reliably read pendingNotificationData.
+  final notificationService = NotificationService();
+  notificationService.init().catchError((e) {
+    debugPrint('Notification init error: $e');
+  });
+
+  // Wait for just the initial message check (fast, no network calls)
+  // with a timeout so we never block app startup indefinitely.
+  await notificationService.initialMessageChecked.timeout(
+    const Duration(seconds: 2),
+    onTimeout: () {
+      debugPrint('Initial message check timed out, proceeding without it');
+    },
+  );
 
   runApp(const App());
 }

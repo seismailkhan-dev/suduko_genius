@@ -12,6 +12,7 @@ import '../../../core/db/db_service.dart';
 import '../../../core/puzzle/models.dart';
 import '../../../core/puzzle/sudoku_generator.dart';
 import '../../../core/puzzle/sudoku_validator.dart';
+import '../../../services/notification_service.dart';
 import '../../daily/daily_controller.dart';
 import '../../events/event_controller.dart';
 import '../../../core/firebase/firestore_service.dart';
@@ -73,18 +74,51 @@ class GameController extends GetxController with WidgetsBindingObserver {
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
 
+  Difficulty? _pendingDifficulty;
+
   @override
   void onInit() {
     super.onInit();
     WidgetsBinding.instance.addObserver(this);
     
-    final Map<String, dynamic>? args = Get.arguments;
+    // Check Get.arguments first, fallback to static NotificationService data
+    final dynamic rawArgs = Get.arguments;
+    final Map<String, dynamic>? args = (rawArgs is Map<String, dynamic>) 
+        ? rawArgs 
+        : NotificationService.lastMessageData;
+
+    if (rawArgs == null && NotificationService.lastMessageData != null) {
+      debugPrint('GameController: Get.arguments was null, using NotificationService.lastMessageData fallback');
+    }
+
+    debugPrint('GameController: onInit arguments: $args');
+    
     if (args != null) {
+      // Clear the static store now that we've captured it
+      NotificationService.lastMessageData = null;
+
       isDaily = args['isDaily'] ?? false;
       
       final action = args['action'];
       if (action == 'new') {
-        startGame(args['difficulty']);
+        final dArg = args['difficulty'];
+        Difficulty d = Difficulty.easy;
+        
+        if (dArg is Difficulty) {
+          d = dArg;
+          debugPrint('GameController: Using Difficulty enum from args: ${d.name}');
+        } else if (dArg is String) {
+          d = Difficulty.values.firstWhere(
+            (e) => e.name.toLowerCase() == dArg.toLowerCase(),
+            orElse: () => Difficulty.easy,
+          );
+          debugPrint('GameController: Parsed Difficulty from String "$dArg": ${d.name}');
+        } else {
+          debugPrint('GameController: Difficulty arg was missing or invalid type: $dArg. Defaulting to Easy.');
+        }
+        
+        _pendingDifficulty = d;
+        startGame(d);
       } else if (action == 'resume') {
         resumeSavedGame(args['savedGame']);
       } else if (action == 'daily') {
@@ -92,6 +126,22 @@ class GameController extends GetxController with WidgetsBindingObserver {
       } else if (action == 'daily_puzzle') {
         _applyPuzzle(args['puzzle']);
       }
+    } else {
+      debugPrint('GameController: No valid arguments found in onInit');
+    }
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    // Safety check: if board is empty and no game is in progress, start a new one
+    final isBoardEmpty = userGrid.every((row) => row.every((cell) => cell == 0));
+    if (isBoardEmpty) {
+      final d = _pendingDifficulty ?? Difficulty.easy;
+      debugPrint('GameController: Empty board detected in onReady. Pending difficulty: ${_pendingDifficulty?.name ?? "NONE"}. Starting fallback game with: ${d.name}');
+      startGame(d);
+    } else {
+      debugPrint('GameController: Board successfully populated in onReady');
     }
   }
 
@@ -353,6 +403,7 @@ class GameController extends GetxController with WidgetsBindingObserver {
   // ── Private helpers ───────────────────────────────────────────────────────
 
   void _applyPuzzle(SudokuPuzzle p) {
+    debugPrint('GameController: _applyPuzzle - Setting difficulty to: ${p.difficulty.name}');
     _currentPuzzle = p;
     difficulty.value = p.difficulty;
 

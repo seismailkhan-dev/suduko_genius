@@ -1,11 +1,13 @@
 // lib/features/stats/stats_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
 import '../../app/theme/app_theme.dart';
 import '../../core/puzzle/models.dart';
+import '../../services/notification_service.dart';
 import 'stats_controller.dart';
 
 class StatsScreen extends StatelessWidget {
@@ -202,6 +204,56 @@ class StatsScreen extends StatelessWidget {
                     ),
                   ).animate().fadeIn(delay: (700 + index * 100).ms);
                 }),
+
+                const SizedBox(height: 48),
+
+                // Debug Section
+                Text(
+                  'DEBUG TOOLS',
+                  style: textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    color: Colors.grey,
+                  ),
+                  textAlign: TextAlign.center,
+                ).animate().fadeIn(delay: 1200.ms),
+                const SizedBox(height: 12),
+                
+                GestureDetector(
+                  onTap: () async {
+                    await NotificationService().getAndPrintToken();
+                    Get.snackbar(
+                      'FCM Token',
+                      'Token printed to console and copied to clipboard!',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.black87,
+                      colorText: Colors.white,
+                      margin: const EdgeInsets.all(20),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: colors.boardBackground,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.terminal_rounded, size: 18, color: Colors.grey.shade600),
+                        const SizedBox(width: 8),
+                        Text(
+                          'PRINT FCM TOKEN',
+                          style: textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ).animate().fadeIn(delay: 1300.ms),
               ],
             ),
           ),

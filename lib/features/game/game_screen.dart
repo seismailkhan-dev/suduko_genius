@@ -18,20 +18,8 @@ class GameScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final ctrl = Get.find<GameController>();
 
-    // Process difficulty from push notification route arguments
-    final arg = ModalRoute.of(context)?.settings.arguments;
-    if (arg != null && arg is String) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        // Only initialize if the game hasn't started yet
-        if (ctrl.elapsedSeconds.value == 0 && !ctrl.isGameOver.value && !ctrl.isComplete.value) {
-          final diffEnum = Difficulty.values.firstWhere(
-            (e) => e.name == arg.toLowerCase(),
-            orElse: () => Difficulty.easy,
-          );
-          ctrl.startGame(diffEnum);
-        }
-      });
-    }
+    // Note: Difficulty processing is now handled primarily by GameController.onInit
+    // via Get.arguments to ensure consistency between manual and notification launches.
 
     // Show game-over dialog reactively whenever isGameOver flips to true.
     ever(ctrl.isGameOver, (bool over) {

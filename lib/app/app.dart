@@ -21,8 +21,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Inject ThemeController globally
-    final themeController = Get.put(ThemeController());
+    final themeController = Get.find<ThemeController>();
 
     return Obx(() => GetMaterialApp(
           navigatorKey: navigatorKey,

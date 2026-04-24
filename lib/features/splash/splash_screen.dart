@@ -9,6 +9,7 @@ import '../../core/db/db_service.dart';
 import '../../core/firebase/auth_service.dart';
 import '../../app/controllers/settings_controller.dart';
 import '../../core/ads/ad_service.dart';
+import '../../services/notification_service.dart';
 import '../gamification/achievement_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -33,26 +34,54 @@ class _SplashScreenState extends State<SplashScreen> {
     try {
       await Future.wait([
         DbService.instance.init(),
-        MobileAds.instance.initialize(),
+        MobileAds.instance.initialize().timeout(
+          const Duration(seconds: 3),
+          onTimeout: () => InitializationStatus({}),
+        ),
       ]);
 
       // Trigger internal async init for services already in Get
-      await AuthService.to.init();
+      await AuthService.to.init().timeout(
+        const Duration(seconds: 3),
+        onTimeout: () {},
+      );
       // Register global settings and gamification services
-      Get.put(SettingsController(), permanent: true);
       Get.put(AchievementService(DbService.instance.database), permanent: true);
       
       // Initialize and register AdService
-      await Get.put(AdService(), permanent: true).init();
+      await Get.put(AdService(), permanent: true).init().timeout(
+        const Duration(seconds: 3),
+        onTimeout: () => Get.find<AdService>(),
+      );
     } catch (e) {
       debugPrint('Initialization error: $e');
     }
 
+    // Ensure the initial message check has completed before we read it
+    await NotificationService().initialMessageChecked.timeout(
+      const Duration(seconds: 2),
+      onTimeout: () {
+        debugPrint('Initial message check timed out in splash');
+      },
+    );
+
     // Wait for the minimum time to pass so the splash animation finishes.
     await timer;
 
-    // Route to Home
-    Get.offAllNamed('/home');
+    // Grab pending data BEFORE navigating away from splash
+    final notifService = NotificationService();
+    final pendingData = notifService.pendingNotificationData;
+
+    if (pendingData != null) {
+      // Clear it so it's not processed again
+      notifService.pendingNotificationData = null;
+
+      // Let the notification service handle navigation directly
+      notifService.handleMessageData(pendingData);
+    } else {
+      // No notification — just go to home
+      Get.offAllNamed('/home');
+    }
   }
 
 
